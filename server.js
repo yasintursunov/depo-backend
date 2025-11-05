@@ -1,13 +1,9 @@
-const express = require('express');
+import dotenv from 'dotenv';
+dotenv.config();
+import app from './src/app.js';
 
-const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 8000;
 
-app.get('/debug', (req, res) => {
-    console.log('worked');
-    res.send('Debug endpoint accessed');
-});
-
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server started on http://localhost:${PORT}`);
 });
