@@ -6,13 +6,30 @@ import { adminClient } from '../models/supabaseClient.js';
 export async function createInventory(req, res) {
   try {
     if (!req.user) return res.status(401).json({ error: 'unauthenticated' });
+
     const owner_id = req.user.id;
-    const { title, description, category, image_url, is_public } = req.body;
-    const inv = await inventoryService.createInventory({ owner_id, title, description, category, image_url, is_public });
+    const { title, description, category, image_url, is_public } = req.body || {};
+
+    if (!title || typeof title !== 'string' || !title.trim()) {
+      return res.status(400).json({ error: 'validation_failed', details: 'title is required' });
+    }
+
+    const payload = {
+      owner_id,
+      title: title.trim(),
+      description: description ?? null,
+      category: category ?? 'Other',
+      image_url: image_url ?? null,
+      is_public: Boolean(is_public)
+    };
+
+    const inv = await inventoryService.createInventory(payload);
     res.status(201).json(inv);
   } catch (err) {
-    console.error('createInventory', err);
-    res.status(500).json({ error: 'create_failed' });
+    console.error('createInventory ERROR:', err);
+    // expose details in dev only
+    const details = err?.message || err?.details || (err && JSON.stringify(err)) || null;
+    res.status(500).json({ error: 'create_failed', details });
   }
 }
 
@@ -55,8 +72,9 @@ export async function listInventories(req, res) {
     const data = await inventoryService.listInventories({ limit: Number(limit), offset: Number(offset) });
     res.json(data);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'list_failed' });
+    console.error('listInventories ERROR:', err);
+    const details = err?.message || err?.details || (err && JSON.stringify(err)) || null;
+    res.status(500).json({ error: 'list_failed', details });
   }
 }
 

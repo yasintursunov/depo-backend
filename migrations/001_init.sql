@@ -115,6 +115,8 @@ CREATE TABLE IF NOT EXISTS "sessions" (
 );
 CREATE INDEX IF NOT EXISTS sessions_expires_idx ON "sessions" (expires);
 
+ALTER TABLE users ADD COLUMN IF NOT EXISTS access_token text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS refresh_token text;
 
 ALTER TABLE "inventories" ADD COLUMN IF NOT EXISTS search_vector tsvector;
 ALTER TABLE "items" ADD COLUMN IF NOT EXISTS search_vector tsvector;

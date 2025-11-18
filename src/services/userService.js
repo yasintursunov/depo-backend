@@ -20,8 +20,12 @@ export async function findByEmail(email) {
   return data;
 }
 
-export async function createUser({ google_id, name, email }) {
-  const { data, error } = await adminClient.from(TABLE).insert({ google_id, name, email }).select().single();
+export async function createUser({ google_id, name, email, access_token = null, refresh_token = null }) {
+  const { data, error } = await adminClient
+    .from(TABLE)
+    .insert({ google_id, name, email, access_token, refresh_token })
+    .select()
+    .single();
   if (error) throw error;
   return data;
 }
@@ -39,18 +43,24 @@ export async function upsertFromGoogle({ googleId, name, email, accessToken = nu
     return updateUser(existingByGoogle.id, {
       name,
       email,
-      
+      access_token: accessToken,
+      refresh_token: refreshToken,
     });
   }
   // search by email
   if (email) {
     const existingByEmail = await findByEmail(email);
     if (existingByEmail) {
-      return updateUser(existingByEmail.id, { google_id: googleId, name });
+      return updateUser(existingByEmail.id, {
+        google_id: googleId,
+        name,
+        access_token: accessToken,
+        refresh_token: refreshToken
+      });
     }
   }
-  // create
-  return createUser({ google_id: googleId, name, email });
+ 
+  return createUser({ google_id: googleId, name, email,  access_token: accessToken, refresh_token: refreshToken });
 }
 
 export async function listUsers({ limit = 50, offset = 0 } = {}) {

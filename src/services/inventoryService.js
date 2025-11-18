@@ -30,19 +30,12 @@ export async function listInventories({ limit = 50, offset = 0, owner_id } = {})
     if (owner_id) q = q.eq('owner_id', owner_id);
     const { data, error } = await q;
     if (error) {
-      console.error('Supabase query error in listInventories:', error);
+      console.error('listInventories supabase error:', error);
       throw error;
     }
     return data;
   } catch (err) {
-    
-    const msg = (err && err.message) ? err.message : String(err);
-    console.error('listInventories caught error:', msg, err);
-    if (msg.toLowerCase().includes('fetch failed') || msg.toLowerCase().includes('undici')) {
-      const e = new Error('SUPABASE_NETWORK_ERROR: Cannot reach Supabase. Check SUPABASE_URL, network or service role key.');
-      e.details = msg;
-      throw e;
-    }
+    console.error('listInventories catch:', err);
     throw err;
   }
 }
